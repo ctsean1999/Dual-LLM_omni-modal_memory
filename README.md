@@ -161,14 +161,6 @@ response = client.chat.completions.create(
 )
 ```
 
-## License
-
-[MIT License] (Customize as needed)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## Acknowledgments
 
 - Qwen1.5 and Qwen3-Max models by Alibaba Cloud
