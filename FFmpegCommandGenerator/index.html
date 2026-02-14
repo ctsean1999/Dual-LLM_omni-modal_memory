@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFmpeg Command Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        .container {
+            max-width: 900px;
+            margin-top: 50px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #343a40;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            font-size: 16px;
+            padding: 10px 24px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            font-size: 16px;
+            padding: 10px 24px;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+        }
+        #commandDisplay {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            min-height: 80px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            word-break: break-all;
+        }
+        .command-history {
+            margin-top: 30px;
+        }
+        .command-nav {
+            margin-bottom: 15px;
+        }
+        .command-info {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .time-input {
+            display: flex;
+            align-items: center;
+        }
+        .time-input .form-control {
+            text-align: center;
+        }
+        .separator {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        .video-path-container {
+            position: relative;
+        }
+        .video-path-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .video-path-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .video-path-item:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="message" class="alert" style="display: none;"></div>
+        <h1 class="text-center"><i class="fa fa-terminal" aria-hidden="true"></i> FFmpeg Command Generator</h1>
+        
+        <form id="commandForm">
+            <div class="form-group">
+                <label for="inputFile"><i class="fa fa-file-video-o" aria-hidden="true"></i> Video Address (-i)</label>
+                <div class="video-path-container">
+                    <textarea class="form-control" id="inputFile" placeholder="Please enter the complete path to the video file" rows="3" style="width: 100%; resize: vertical;"></textarea>
+                    <div class="video-path-dropdown" id="videoPathDropdown"></div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="startTime"><i class="fa fa-clock-o" aria-hidden="true"></i> Start Time (-ss)</label>
+                <div class="time-input">
+                    <input type="number" class="form-control" id="startHour" min="0" placeholder="h" style="width: 80px;">
+                    <span class="separator">:</span>
+                    <input type="number" class="form-control" id="startMinute" min="0" max="59" placeholder="m" style="width: 80px;">
+                    <span class="separator">:</span>
+                    <input type="number" class="form-control" id="startSecond" min="0" max="59" placeholder="s" style="width: 80px;">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="endTime"><i class="fa fa-clock-o" aria-hidden="true"></i> End Time (-to)</label>
+                <div class="time-input">
+                    <input type="number" class="form-control" id="endHour" min="0" placeholder="h" style="width: 80px;">
+                    <span class="separator">:</span>
+                    <input type="number" class="form-control" id="endMinute" min="0" max="59" placeholder="m" style="width: 80px;">
+                    <span class="separator">:</span>
+                    <input type="number" class="form-control" id="endSecond" min="0" max="59" placeholder="s" style="width: 80px;">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="outputFile"><i class="fa fa-file-video-o" aria-hidden="true"></i> Video Name</label>
+                <input type="text" class="form-control" id="outputFile" placeholder="Please enter the output video name (e.g., output.mp4)">
+            </div>
+            
+            <button type="button" id="generateBtn" class="btn btn-primary mr-3"><i class="fa fa-magic" aria-hidden="true"></i> Generate Command</button>
+            <button type="button" id="saveBtn" class="btn btn-success" disabled><i class="fa fa-save" aria-hidden="true"></i> Save Command</button>
+            <button type="button" id="newCommandBtn" class="btn btn-secondary ml-3"><i class="fa fa-plus" aria-hidden="true"></i> New Command</button>
+        </form>
+        
+        <div id="commandPreview" class="mt-4">
+            <h4>Generated Command:</h4>
+            <div id="commandDisplay"></div>
+        </div>
+        
+        <div class="command-history mt-5">
+            <h4><i class="fa fa-history" aria-hidden="true"></i> Command History</h4>
+            <div class="command-nav">
+                <button type="button" id="prevBtn" class="btn btn-secondary mr-3" disabled><i class="fa fa-arrow-left" aria-hidden="true"></i> Previous</button>
+                <button type="button" id="nextBtn" class="btn btn-secondary" disabled><i class="fa fa-arrow-right" aria-hidden="true"></i> Next</button>
+            </div>
+            <div class="command-info" id="commandInfo">Total 0 commands, currently at 0</div>
+            <div id="historyDisplay" class="command-display">
+                <div id="commandHistory" class="bg-light p-3 rounded border">Please click the buttons to browse command history</div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentCommand = '';
+        let historyCommands = [];
+        let currentIndex = -1;
+        let commonVideoPaths = [];
+        
+        // Initialize after page loads
+        $(document).ready(function() {
+            loadCommonVideoPaths();
+            loadHistoryCommands();
+            setupAutoComplete();
+            
+            // Generate command button click event
+            $('#generateBtn').click(function() {
+                generateCommand();
+            });
+            
+            // Save command button click event
+            $('#saveBtn').click(function() {
+                saveCommand();
+            });
+            
+            // Previous button click event
+            $('#prevBtn').click(function() {
+                navigateHistory(-1);
+            });
+            
+            // Next button click event
+            $('#nextBtn').click(function() {
+                navigateHistory(1);
+            });
+            
+            // New command button click event
+            $('#newCommandBtn').click(function() {
+                createNewCommandFromLast();
+            });
+            
+            // Regenerate command when inputs change
+            $('#inputFile, #outputFile, #startHour, #startMinute, #startSecond, #endHour, #endMinute, #endSecond').on('input', function() {
+                generateCommand();
+            });
+            
+            // Close dropdown when clicking elsewhere
+            $(document).click(function(event) {
+                if (!$(event.target).closest('.video-path-container').length) {
+                    $('#videoPathDropdown').hide();
+                }
+            });
+        });
+        
+        // Load common video paths from backend
+        function loadCommonVideoPaths() {
+            $.ajax({
+                url: '/get_common_video_paths',
+                type: 'GET',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        commonVideoPaths = response.paths || [];
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Failed to load common video paths:', error);
+                }
+            });
+        }
+        
+        // Setup video path auto-complete
+        function setupAutoComplete() {
+            $('#inputFile').on('focus input', function() {
+                const input = $(this).val().toLowerCase();
+                const dropdown = $('#videoPathDropdown');
+                
+                // Filter matching paths
+                const filteredPaths = commonVideoPaths.filter(path => 
+                    path.toLowerCase().includes(input)
+                );
+                
+                if (filteredPaths.length > 0) {
+                    dropdown.empty();
+                    filteredPaths.forEach(path => {
+                        dropdown.append(`<div class="video-path-item" data-path="${path}">${path}</div>`);
+                    });
+                    dropdown.show();
+                } else {
+                    dropdown.hide();
+                }
+            });
+            
+            // Click dropdown item to select path
+            $('.video-path-item').on('click', function() {
+                $('#inputFile').val($(this).data('path'));
+                $('#videoPathDropdown').hide();
+                generateCommand();
+            });
+            
+            // Delegate event for dynamically generated dropdown items
+            $(document).on('click', '.video-path-item', function() {
+                $('#inputFile').val($(this).data('path'));
+                $('#videoPathDropdown').hide();
+                generateCommand();
+            });
+        }
+        
+        // Format time
+        function formatTime(hour, minute, second) {
+            // Handle empty values
+            hour = hour || 0;
+            minute = minute || 0;
+            second = second || 0;
+            
+            // Convert to numbers
+            hour = parseInt(hour, 10);
+            minute = parseInt(minute, 10);
+            second = parseInt(second, 10);
+            
+            // Format time string
+            return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
+        }
+        
+        // Generate FFmpeg command
+        function generateCommand() {
+            const inputFile = $('#inputFile').val().trim();
+            const startTime = formatTime($('#startHour').val(), $('#startMinute').val(), $('#startSecond').val());
+            const endTime = formatTime($('#endHour').val(), $('#endMinute').val(), $('#endSecond').val());
+            const outputFile = $('#outputFile').val().trim();
+            
+            // Validate input
+            if (inputFile && outputFile) {
+                currentCommand = `ffmpeg -i ${inputFile} -ss ${startTime} -to ${endTime} -codec copy ${outputFile}`;
+                $('#commandDisplay').text(currentCommand);
+                $('#saveBtn').prop('disabled', false);
+            } else {
+                currentCommand = '';
+                $('#commandDisplay').text('Please enter video address and output filename');
+                $('#saveBtn').prop('disabled', true);
+            }
+        }
+        
+        // Save command to file
+        function saveCommand() {
+            if (!currentCommand) {
+                showMessage('Please generate command first', 'danger');
+                return;
+            }
+            
+            // Call backend API to save command
+            $.ajax({
+                url: '/save_command',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ command: currentCommand }),
+                success: function(response) {
+                    showMessage('Command saved successfully', 'success');
+                    // Reload history commands
+                    loadHistoryCommands();
+                },
+                error: function(xhr, status, error) {
+                    showMessage('Command save failed: ' + error, 'danger');
+                }
+            });
+        }
+        
+        // Load history commands
+        function loadHistoryCommands() {
+            $.ajax({
+                url: '/get_commands',
+                type: 'GET',
+                success: function(response) {
+                    historyCommands = response.commands || [];
+                    // Show first command if available
+                    currentIndex = historyCommands.length > 0 ? 0 : -1;
+                    updateHistoryNavigation();
+                },
+                error: function(xhr, status, error) {
+                    showMessage('Failed to load history commands: ' + error, 'danger');
+                }
+            });
+        }
+        
+        // Browse history commands
+        function navigateHistory(direction) {
+            if (historyCommands.length === 0) {
+                showMessage('No history commands to browse', 'info');
+                return;
+            }
+            
+            currentIndex += direction;
+            
+            // Loop navigation
+            if (currentIndex < 0) {
+                currentIndex = historyCommands.length - 1;
+            } else if (currentIndex >= historyCommands.length) {
+                currentIndex = 0;
+            }
+            
+            updateHistoryNavigation();
+        }
+        
+        // Update history navigation
+        function updateHistoryNavigation() {
+            $('#commandInfo').text(`Total ${historyCommands.length} commands, currently at ${currentIndex + 1}`);
+            
+            if (historyCommands.length > 0 && currentIndex >= 0) {
+                $('#commandHistory').text(historyCommands[currentIndex]);
+                $('#prevBtn').prop('disabled', false);
+                $('#nextBtn').prop('disabled', false);
+            } else {
+                $('#commandHistory').text('Please click the buttons to browse command history');
+                $('#prevBtn').prop('disabled', true);
+                $('#nextBtn').prop('disabled', true);
+            }
+        }
+        
+        // Create new command from last
+        function createNewCommandFromLast() {
+            if (historyCommands.length === 0) {
+                showMessage('No history commands to create new command from', 'info');
+                return;
+            }
+            
+            // Get the last command
+            const lastCommand = historyCommands[historyCommands.length - 1];
+            
+            // Parse command, extract video path and time information
+            // Match video path after -i
+            const videoPathMatch = lastCommand.match(/-i\s+([^\s]+)/);
+            // Match time after -to
+            const toTimeMatch = lastCommand.match(/-to\s+(\d{2}:\d{2}:\d{2})/);
+            // Match output filename
+            const outputFileMatch = lastCommand.match(/copy\s+([^\s]+)$/);
+            
+            if (videoPathMatch && toTimeMatch) {
+                const videoPath = videoPathMatch[1];
+                const toTime = toTimeMatch[1];
+                
+                // Set video path
+                $('#inputFile').val(videoPath);
+                
+                // Set start time to end time
+                const [hours, minutes, seconds] = toTime.split(':');
+                $('#startHour').val(hours);
+                $('#startMinute').val(minutes);
+                $('#startSecond').val(seconds);
+                
+                // Calculate start time plus 50 seconds as end time
+                let totalSeconds = parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds) + 50;
+                let endHours = Math.floor(totalSeconds / 3600);
+                let endMinutes = Math.floor((totalSeconds % 3600) / 60);
+                let endSeconds = totalSeconds % 60;
+                
+                // Set end time
+                $('#endHour').val(endHours.toString().padStart(2, '0'));
+                $('#endMinute').val(endMinutes.toString().padStart(2, '0'));
+                $('#endSecond').val(endSeconds.toString().padStart(2, '0'));
+                
+                // If there's an output filename, generate new number based on last filename
+                if (outputFileMatch) {
+                    const lastOutputFile = outputFileMatch[1];
+                    // Try to extract number from filename and increment
+                    const numberMatch = lastOutputFile.match(/^(\d+)\.mp4$/);
+                    if (numberMatch) {
+                        const nextNumber = parseInt(numberMatch[1]) + 1;
+                        $('#outputFile').val(`${nextNumber}.mp4`);
+                    } else {
+                        $('#outputFile').val('');
+                    }
+                } else {
+                    $('#outputFile').val('');
+                }
+                
+                // Generate new command
+                generateCommand();
+                
+                showMessage('New command created from last command', 'success');
+            } else {
+                showMessage('Failed to parse last command', 'danger');
+            }
+        }
+        
+        // Show message
+        function showMessage(message, type) {
+            const messageBox = $('#message');
+            messageBox.removeClass('alert-success alert-danger alert-warning alert-info');
+            messageBox.addClass(`alert-${type}`);
+            messageBox.text(message);
+            messageBox.show();
+            
+            // Auto hide after 3 seconds
+            setTimeout(function() {
+                messageBox.hide();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
