@@ -1,0 +1,11 @@
+{
+  "findingdory_pretrain": {
+    "file_name": "findingdory_pretrain.jsonl",
+    "columns": {
+      "prompt": "text"
+    }
+  },
+  "findingdory_sft": {
+    "file_name": "findingdory_sft.json"
+  }
+}
