@@ -1,0 +1,40 @@
+### model
+model_name_or_path:  ./model/Qwen1.5-7B/pretrain_200epoch
+# model_name_or_path:  /data/ct/ft/LLaMA-Factory/saves/Qwen1.5-7B/pretrain_101_200_200epoch_merged
+trust_remote_code: true
+
+### method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 8
+lora_target: all
+
+### dataset
+dataset: findingdory_api_sft_301_1478
+template: qwen
+cutoff_len: 14910
+max_samples: 64790
+overwrite_cache: true
+preprocessing_num_workers: 80
+dataloader_num_workers: 40
+
+### output
+output_dir: ./model/Qwen1.5-7B/sft_20epoch
+logging_steps: 1
+save_steps: 50
+plot_loss: true
+overwrite_output_dir: true
+save_only_model: false
+report_to: none  # choices: [none, wandb, tensorboard, swanlab, mlflow]
+
+### train
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 8
+learning_rate: 1.0e-4
+num_train_epochs: 20
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+bf16: true
+ddp_timeout: 180000000
+resume_from_checkpoint: null
