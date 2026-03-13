@@ -1,0 +1,11 @@
+{
+  "neijing_pretrain": {
+    "file_name": "neijing_pretrain.jsonl",
+    "columns": {
+      "prompt": "text"
+    }
+  },
+  "neijing_sft": {
+    "file_name": "neijing_sft.json"
+  }
+}
