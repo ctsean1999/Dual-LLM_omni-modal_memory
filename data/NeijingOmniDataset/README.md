@@ -2,7 +2,7 @@
 
 This project provides a set of tools for evaluating large language models' Q&A capabilities on Huangdi Neijing related knowledge, mainly including two core scripts: `neijing_val.py` and `calculate_accuracy.py`.
 
-Full dataset download link: http://ggrs.ltd:8003/download/neijing%2FNeijingOmni-modalDataset.zip
+Full dataset download link: https://modelscope.cn/datasets/ctsean/Neijing_Omni-modal_Dataset
 
 ## Feature Introduction
 
