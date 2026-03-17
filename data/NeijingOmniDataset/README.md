@@ -103,6 +103,8 @@ Output is in JSONL format, each line contains a video's answer results, includin
 - `multihop_qa`: Multi-hop questions and their answers
 - `mmlu_results`: MMLU multiple choice questions and their answers
 
+Model download URL: https://modelscope.cn/models/ctsean/Qwen1.5-7B_neijing_sft/
+
 ### 2. Using calculate_accuracy.py to evaluate answer quality
 
 **Basic usage**:
