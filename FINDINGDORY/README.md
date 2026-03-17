@@ -115,7 +115,7 @@ Run the multi-GPU testing script to evaluate model performance using test data:
 ```bash
 python findingdory_val_multi_GPU.py
 ```
-
+Model download URL: https://modelscope.cn/models/ctsean/Qwen1.5-7B_findingdory_sft
 Test results will be saved in the `model_result.jsonl` file.
 
 ### Step 3: Calculate accuracy
