@@ -79,19 +79,6 @@ You can modify this path in the `main()` function.
    - Use RAG with Qwen3-Max if similarities are below the threshold (0.7)
    - Save all results to a CSV file in the `result` directory
 
-## Project Structure
-
-```
-.
-├── frame.py              # Main script containing all functionalities
-├── data/                 # Dataset directory
-│   └── NeijingOmni-modalDataset.json  # Sample dataset
-├── model/                # Fine-tuned model directory
-│   └── qwen1_5_7b_pretrain20epoch_merged_lora1200epoch_merged  # Fine-tuned Qwen model
-├── result/               # Output CSV directory
-└── README.md             # This file
-```
-
 ## Key Components
 
 ### Answer Generation
