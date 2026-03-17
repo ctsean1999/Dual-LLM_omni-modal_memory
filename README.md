@@ -1,4 +1,4 @@
-# A Python framework for paper *Keep It Simple: A Memory Framework for Omni-modal Agents Based on Cerebrum-Cerebellum Coordination*. （Code is being organized and will be updated to this repository gradually in the near future.）
+# A Python framework for paper *Keep It Simple: A Memory Framework for Omni-modal Agents Based on Cerebrum-Cerebellum Coordination*. 
 
 This project implements a framework for generating and comparing answers using multiple LLMs (Large Language Models), comparing their outputs, and leveraging Retrieval-Augmented Generation (RAG) for enhanced responses.
 
