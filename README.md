@@ -33,51 +33,56 @@ This project implements a framework for generating and comparing answers using m
    pip install torch transformers numpy openai
    ```
 
-## Configuration
+## Model Preparation
 
-### Environment Variables
+提前下载以下模型到 `model` 文件夹：
 
-Set up the required API key for accessing Qwen3-Max via Dashscope:
-
-```bash
-export DASHSCOPE_API_KEY="your_api_key_here"
-```
-
-### Model Paths
-
-The framework uses local models stored in specific paths. Ensure these models are available:
-
-- **Qwen1.5 Models**:
-  - Base model: `./LLM/Qwen1.5-7B-Chat`
-  - Fine-tuned model: `./model/qwen1_5_7b_pretrain96epoch_merged_lora12epoch_merged`
-
-- **BERT Model**:
-  - Chinese RoBERTa: `./LLM/chinese-roberta-wwm-ext`
-
-### Dataset Paths
-
-The framework processes JSON datasets. The default path is:
-```
-/home/ccc/Documents/myCode/lifelong/myTest/frame/data/NeijingClipsMultimodalDataset339.json
-```
-
-You can modify this path in the `main()` function.
+- **Qwen1.5-7B-Chat**
+- **Qwen1.5-7B_neijing_sft** (URL: `https://modelscope.cn/models/ctsean/Qwen1.5-7B_neijing_sft/`)
+- **chinese-roberta-wwm-ext**
+- **all-MiniLM-L6-v2**
 
 ## Usage
 
-1. Ensure all required models and dependencies are installed and configured
+### Step 1: Generate Fine-tuned Medium-scale LLM (Cerebellum) results
 
-2. Run the main script:
-   ```bash
-   python frame.py
-   ```
+运行以下命令得到 Fine-tuned Medium-scale LLM (Cerebellum) 的结果 $Answer_{ft}$：
 
-3. The script will:
-   - Load the specified dataset
-   - Generate answers using the configured Qwen1.5 models
-   - Calculate similarity between generated answers
-   - Use RAG with Qwen3-Max if similarities are below the threshold (0.7)
-   - Save all results to a CSV file in the `result` directory
+```bash
+python qwen1.5-7B_result.py --model_path ./model/Qwen1.5-7B_neijing_sft --output_file ./result/Qwen1.5-7B_neijing_sft_results.jsonl
+```
+
+### Step 2: Generate Original Medium-scale LLM results
+
+运行以下命令得到 Original Medium-scale LLM 的结果 $Answer_{org}$：
+
+```bash
+python qwen1.5-7B_result.py --model_path ./model/Qwen1.5-7B-Chat --output_file ./result/Qwen1.5-7B-Chat_results.jsonl
+```
+
+### Step 3: Merge results for Cerebellum-based RAG
+
+运行以下命令合并结果，得到用于 Cerebellum-based RAG 的输入：
+
+```bash
+python merge_SFT_ORG.py
+```
+
+### Step 4: Generate final Cerebrum results
+
+运行以下命令得到最终结果：
+
+```bash
+python cerebrum_result.py
+```
+
+### Step 5: Calculate answer similarity
+
+运行以下命令计算最终结果与标注答案的相似度：
+
+```bash
+python calculate_answer_similarity.py
+```
 
 ## Key Components
 
@@ -112,41 +117,6 @@ Sample CSV entry:
 | Question Content | Original Answer | Model 1 Answer | Model 2 Answer | chinese-roberta-wwm-ext Similarity | LLM Answer | Timestamp | Data Filename |
 |------------------|----------------|----------------|----------------|-------------------------------------|------------|-----------|---------------|
 | What is yin and yang? | Yin and yang are ancient Chinese philosophical concepts... | Yin and yang are basic categories of ancient philosophy... | Yin and yang refer to interconnected and opposing phenomena in the universe... | 0.8523 | Yin and yang are core concepts in ancient Chinese philosophy, referring to interconnected and opposing phenomena... | 2024-02-09 14:30:22 | NeijingOmni-modalDataset.json |
-
-## Customization
-
-### Adding New Models
-
-To add new models, update the `model_paths` list in the `main()` function:
-
-```python
-model_paths = [
-    '/path/to/your/model1',
-    '/path/to/your/model2'
-]
-```
-
-### Adjusting Similarity Threshold
-
-Modify the threshold in the main processing loop:
-
-```python
-if similarity < 0.7 and len(model_answers) >= 2:
-    # Add reference material
-```
-
-### Changing API Parameters
-
-Adjust parameters for the Qwen3-Max API call in `get_model_answer_with_rag()`:
-
-```python
-response = client.chat.completions.create(
-    model="qwen3-max",
-    messages=messages,
-    temperature=0.6,
-    # Add/modify parameters here
-)
-```
 
 ## Acknowledgments
 
