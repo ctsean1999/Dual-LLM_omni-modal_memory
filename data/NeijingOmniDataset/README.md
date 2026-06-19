@@ -84,11 +84,11 @@ python prepare_sft_data.py
 **Basic usage**:
 
 ```bash
-python neijing_val.py --model_path ./model/Qwen1.5-7B_findingdory_neijing_unke_final --output_file ./model_result.jsonl --data_file ./annotation.json
+python neijing_val.py --model_path ./model/Qwen1.5-7B_neijing_sft --output_file ./model_result.jsonl --data_file ./annotation.json
 ```
 
 **Parameter description**:
-- `--model_path`: Pre-trained model path (default: `./model/Qwen1.5-7B_findingdory_neijing_unke_final`)
+- `--model_path`: Pre-trained model path (default: `./model/Qwen1.5-7B_neijing_sft`)
 - `--output_file`: Output result file path (default: `./model_result.jsonl`)
 - `--data_file`: Annotated data file path (default: `./annotation.json`)
 - `--max_retries`: Maximum number of retries (default: 3)
